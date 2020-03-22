@@ -1,7 +1,7 @@
 # collective_particles
 COVID-19 Infection Simulation
 
-raw_covid19.py
+draw_covid19.py
 
 https://github.com/MuAuan/collective_particles/blob/master/data/fig_Hubei_.png
 
