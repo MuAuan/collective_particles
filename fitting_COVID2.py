@@ -20,32 +20,33 @@ confirmed_d = [0] * (len(data_d.columns) - 4)
 days_from_22_Jan_20 = np.arange(0, len(data.columns) - 4, 1)
 
 #City
-#city = "Hubei"
+city = "Hubei"
 #city = "Korea, South"
 #city = "Italy"
 #city = "Spain"
 #city = "Iran"
-city = "Japan"
+#city = "Japan"
+#city = "Germany"
 
 #データを加工する
 t_cases = 0
 
-for i in range(0, len(data), 1):
-    if (data.iloc[i][1] == city): #for country/region
-    #if (data.iloc[i][0] == city):  #for province:/state  
-        print(str(data.iloc[i][0]) + " of " + data.iloc[i][1])
-        for day in range(4, len(data.columns), 1):
-            confirmed[day - 4] += data.iloc[i][day] -  data_r.iloc[i][day]
 for i in range(0, len(data_r), 1):
-    if (data_r.iloc[i][1] == city): #for country/region
-    #if (data_r.iloc[i][0] == city):  #for province:/state  
+    #if (data_r.iloc[i][1] == city): #for country/region
+    if (data_r.iloc[i][0] == city):  #for province:/state  
         print(str(data_r.iloc[i][0]) + " of " + data_r.iloc[i][1])
         for day in range(4, len(data.columns), 1):            
             confirmed_r[day - 4] += data_r.iloc[i][day]
-            #t_recover += data_r.iloc[i][day]        
+            #t_recover += data_r.iloc[i][day]
+for i in range(0, len(data), 1):
+    #if (data.iloc[i][1] == city): #for country/region
+    if (data.iloc[i][0] == city):  #for province:/state  
+        print(str(data.iloc[i][0]) + " of " + data.iloc[i][1])
+        for day in range(4, len(data.columns), 1):
+            confirmed[day - 4] += data.iloc[i][day] -  confirmed_r[day - 4]            
 for i in range(0, len(data_d), 1):
-    if (data_d.iloc[i][1] == city): #for country/region
-    #if (data_d.iloc[i][0] == city):  #for province:/state  
+    #if (data_d.iloc[i][1] == city): #for country/region
+    if (data_d.iloc[i][0] == city):  #for province:/state  
         print(str(data_d.iloc[i][0]) + " of " + data_d.iloc[i][1])
         for day in range(4, len(data.columns), 1):
             confirmed_d[day - 4] += data_d.iloc[i][day] #fro drawings
@@ -60,10 +61,10 @@ def seir_eq(v,t,beta,lp,ip,S0):
     return [a,b,c,d]
 
 #solve seir model
-N0 = 1482 #spein46487 #korea12664 #Itary80815 #Iran35373 #58403 #korea8901 #70939. #Hubei #22116 Iran #1042 japan
-N,S0,E0,I0,R0=int(N0*1.5),int(N0*1.5),int(1),int(0),0
+N0 = 70961 #Germany36386 #japan1482#spein46487 #korea12664 #Itary80815 #Iran35373 #58403 #korea8901 #70939. #Hubei #22116 Iran #1042 japan
+N,S0,E0,I0,R0=int(N0*1.5),int(N0*1.5),int(318),int(389),0
 ini_state=[S0,E0,I0,R0]
-beta,lp,ip=0.16049559386034234, 6.684238418998367e-32, 74.73237056193248 #Iran 0.16744196655146937, 8.355034850220927e-24, 50.50204933956246 #Hubei 0.48637152205856893, 2.4823823094760824, 27.376347305942296, 88616.56740233 #1, 2, 7.4 
+beta,lp,ip=1, 2, 7.4 #0.16049559386034234, 6.684238418998367e-32, 74.73237056193248 #Iran 0.16744196655146937, 8.355034850220927e-24, 50.50204933956246 #Hubei 0.48637152205856893, 2.4823823094760824, 27.376347305942296, 88616.56740233 #1, 2, 7.4 
 t_max=len(days_from_22_Jan_20)
 dt=0.01
 t=np.arange(0,t_max,dt)

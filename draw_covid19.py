@@ -5,10 +5,14 @@ import matplotlib.pyplot as plt
 import pandas as pd
 
 #pandasでCSVデータ読む。
+data = pd.read_csv('COVID-19/csse_covid_19_data/csse_covid_19_time_series/time_series_covid19_confirmed_global.csv')
+data_r = pd.read_csv('COVID-19/csse_covid_19_data/csse_covid_19_time_series/time_series_covid19_recovered_global.csv')
+data_d = pd.read_csv('COVID-19/csse_covid_19_data/csse_covid_19_time_series/time_series_covid19_deaths_global.csv')
+"""
 data = pd.read_csv('COVID-19/csse_covid_19_data/csse_covid_19_time_series/time_series_19-covid-Confirmed.csv')
 data_r = pd.read_csv('COVID-19/csse_covid_19_data/csse_covid_19_time_series/time_series_19-covid-Recovered.csv')
 data_d = pd.read_csv('COVID-19/csse_covid_19_data/csse_covid_19_time_series/time_series_19-covid-Deaths.csv')
-
+"""
 confirmed = [0] * (len(data.columns) - 4)
 confirmed_r = [0] * (len(data_r.columns) - 4)
 confirmed_d = [0] * (len(data_d.columns) - 4)
@@ -17,20 +21,20 @@ deaths_rate = [0] * (len(data_d.columns) - 4)
 days_from_22_Jan_20 = np.arange(0, len(data.columns) - 4, 1)
 
 city = "Hubei"
-city = "Korea, South"
-city = "Iran"
-city = "Italy"
-city = "Spain"
-city = "Iraq"
-city = "Japan"
-city = "Singapore"
-city = "Germany"
-city = "China"
-city = "US"
-city = "France"
-city = "United Kingdom"
-city = "Switzerland"
-city = "Indonesia"
+#city = "Korea, South"
+#city = "Iran"
+#city = "Italy"
+#city = "Spain"
+#city = "Iraq"
+#city = "Japan"
+#city = "Singapore"
+#city = "Germany"
+#city = "China"
+#city = "US"
+#city = "France"
+#city = "United Kingdom"
+#city = "Switzerland"
+#city = "Indonesia"
 #city = "Guangdong"
 #city = "Zhejiang"
 #city = "New York"
@@ -39,17 +43,25 @@ city = "Indonesia"
 t_cases = 0
 t_recover = 0
 t_deaths = 0
+for i in range(0, len(data_r), 1):
+    #if (data_r.iloc[i][1] == city): #for country/region
+    if (data_r.iloc[i][0] == city):  #for province:/state  
+        print(str(data_r.iloc[i][0]) + " of " + data_r.iloc[i][1])
+        for day in range(4, len(data.columns), 1):            
+            confirmed_r[day - 4] += data_r.iloc[i][day]
+        t_recover += data_r.iloc[i][day]      
 for i in range(0, len(data), 1):
-    if (data.iloc[i][1] == city): #for country/region
-    #if (data.iloc[i][0] == city):  #for province:/state  
+    #if (data.iloc[i][1] == city): #for country/region
+    if (data.iloc[i][0] == city):  #for province:/state  
         print(str(data.iloc[i][0]) + " of " + data.iloc[i][1])
         for day in range(4, len(data.columns), 1):
-            confirmed[day - 4] += data.iloc[i][day] -  data_r.iloc[i][day] #+=
-            confirmed_r[day - 4] += data_r.iloc[i][day]
-            confirmed_d[day - 4] += data_d.iloc[i][day]*1 #fro drawings
- 
-        #t_cases += data.iloc[i][day] 
-        t_recover += data_r.iloc[i][day]        
+            confirmed[day - 4] += data.iloc[i][day] -  confirmed_r[day - 4]       
+for i in range(0, len(data_d), 1):
+    #if (data_d.iloc[i][1] == city): #for country/region
+    if (data_d.iloc[i][0] == city):  #for province:/state  
+        print(str(data_d.iloc[i][0]) + " of " + data_d.iloc[i][1])
+        for day in range(4, len(data.columns), 1):
+            confirmed_d[day - 4] += data_d.iloc[i][day] #fro drawings
         t_deaths += data_d.iloc[i][day]
 tl_confirmed = 0        
 for i in range(0, len(confirmed), 1):
