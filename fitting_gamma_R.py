@@ -120,6 +120,7 @@ diff_est=[0] * (len(data.columns) - 4)
 gamma_est=[0] * (len(data.columns) - 4)
 R_est = [0] * (len(data_d.columns) - 4)
 R_0 = [0] * (len(data_d.columns) - 4)
+C = [0] * (len(data_d.columns) - 4)
 for i in range(1,t_max):
     diff_est[i]=est[i]-est[i-1]
 for i in range(0, len(confirmed), 1):        
@@ -127,6 +128,7 @@ for i in range(0, len(confirmed), 1):
         gamma_est[i]=diff_est[i]/confirmed[i]
         R_est[i]= 1+day_confirmed[i]/diff_est[i] # diff_est=gamma*confirmed
         R_0[i]= R_est[i]/(1-gamma_est[i]*R_est[i]*confirmed[i]*i/t_cases)
+        C[i]=gamma_est[i]*(R_est[i]-1)
     else:
         continue
     
@@ -148,6 +150,7 @@ lns6=ax1.semilogy(t1, est,"-", color="black", zorder=1, label = "est_r0={:.2f}al
 lns7=ax2.plot(t1, diff_est,"-", color="black", zorder=1, label = "diff_est_r0={:.2f}alpha={:.2e}".format(r0,alpha))
 lns9=ax2.bar(days_from_22_Jan_20_, day_confirmed_r, label = "day_confirmed_r")
 #lns10=ax2.plot(days_from_22_Jan_20_, R_0, "o-", color="red",label = "R_0")
+lns4=ax2.plot(days_from_22_Jan_20_, C, "-", color="red",label = "gamma*(R-1)")
 
 lns_ax1 = lns1 +lns2 +lns5 + lns6 +lns8
 labs_ax1 = [l.get_label() for l in lns_ax1]
@@ -179,6 +182,25 @@ plt.pause(1)
 plt.savefig('./fig/removed_{}_gamma_R_{}.png'.format(city,skd)) 
 plt.close() 
 
+#matplotlib描画
+fig, ax4 = plt.subplots(1,1,figsize=(1.6180 * 4, 4*1))
+
+lns4=ax4.plot(days_from_22_Jan_20_, C, "o-", color="blue",label = "gamma*(R-1)")
+
+ax4.legend(loc=2)
+
+ax4.set_title(city +" ; {} cases, {} recovered, {} deaths".format(t_cases,t_recover,t_deaths))
+ax4.set_xlabel("days from 22, Jan, 2020")
+ax4.set_ylabel("gamma*(R-1) ")
+ax4.set_ylim(0,0.4)
+
+ax4.grid()
+
+plt.pause(1)
+plt.savefig('./fig/removed_{}_gammaR_{}.png'.format(city,skd)) 
+plt.close() 
+
+
 t=np.arange(63,100,dt)
 t3=t
 est_confirmed=estimate_i(ini_state,r0_,alpha_)
@@ -204,3 +226,4 @@ ax3.grid()
 plt.pause(1)
 plt.savefig('./fig/exterpolate_{}_gamma_R_{}.png'.format(city,skd)) 
 plt.close() 
+
