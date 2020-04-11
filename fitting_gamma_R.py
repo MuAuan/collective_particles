@@ -25,6 +25,22 @@ gamma_ = [0] * (len(data_d.columns) - 4)
 
 
 city = "Japan"
+#city ="world"
+#city = "Germany"
+#city = "Italy"
+#city = "Spain"
+#city = "United Kingdom"
+#city ="US"
+#city = "Iran"
+#city = "Switzerland"
+#city ="Sweden"
+#city = "France"
+#city = "Hong Kong"
+#city = "Beijing"
+#city = "Taiwan*"
+#city = "Hubei"
+city = "Korea, South"
+city = "India"
 
 skd=5 #2 #1 #4 #3 #2 #slopes average factor
 #データを加工する
@@ -67,8 +83,8 @@ dlog_confirmed[0]=np.log(confirmed[0])
 dlog_confirmed[1]=np.log(confirmed[1])-np.log(confirmed[0])
 ratio_confirmed = [0] * (len(data.columns) - 4)
 ratio_confirmed[0]=np.log(confirmed[0])
-ratio_confirmed[1]=(confirmed[1]-confirmed[0])/(confirmed[0])
-ratio_confirmed[2]=(confirmed[2]-confirmed[0])/(confirmed[0])/2
+ratio_confirmed[1]=(confirmed[1]-confirmed[0]) #/(confirmed[0])
+ratio_confirmed[2]=(confirmed[2]-confirmed[0])/2 #/(confirmed[0])/2
 
 for i in range(skd, len(confirmed), 1):        
     if confirmed[i] > 0:    
@@ -83,23 +99,33 @@ dt=1
 t=np.arange(0,t_max,dt)
 t1=t
 
-obs_i = confirmed_r[:]
+obs_i = confirmed_r
 #function which estimate i from seir model func 
-def estimate_i(ini_state,r0,alpha):
-    est = r0*np.exp(alpha*(t))
+def estimate_i(ini_state,r0,a):
+    est = r0*np.exp(a*t+0*t)
     return est
 
 def y(params):
     est_i=estimate_i(ini_state,params[0],params[1])
     return np.sum((est_i-obs_i)*(est_i-obs_i))
+
+def estimate_j(ini_state,r0,alpha):
+    est = r0+alpha*(t)
+    return est
+
+def yj(params):
+    est_i=estimate_j(ini_state,params[0],params[1])
+    return np.sum((est_i-obs_i)*(est_i-obs_i))
+
 r0=1
-alpha = 1
-ini_state=[5.70579672, 0.00755685]
+a = 1
+
+ini_state=[4.34379478e+03, 3.64147576e-02]
 #optimize logscale likelihood function
 mnmz=minimize(y,ini_state,method="nelder-mead")
 print(mnmz)
-r0,alpha = mnmz.x[0],mnmz.x[1]
-est=estimate_i(ini_state,r0,alpha)
+r0,a = mnmz.x[0],mnmz.x[1] #,mnmz.x[2]
+est=estimate_i(ini_state,r0,a)
 
 t=np.arange(63,t_max,dt)
 t2=t
@@ -124,14 +150,14 @@ C = [0] * (len(data_d.columns) - 4)
 for i in range(1,t_max):
     diff_est[i]=est[i]-est[i-1]
 for i in range(0, len(confirmed), 1):        
-    if confirmed[i] > 0:    
+    if confirmed[i] > 0 and diff_est[i] > 0:    
         gamma_est[i]=diff_est[i]/confirmed[i]
         R_est[i]= 1+day_confirmed[i]/diff_est[i] # diff_est=gamma*confirmed
-        R_0[i]= R_est[i]/(1-gamma_est[i]*R_est[i]*confirmed[i]*i/t_cases)
+        #R_0[i]= R_est[i]/(1-gamma_est[i]*R_est[i]*confirmed[i]*i/t_cases)
         C[i]=gamma_est[i]*(R_est[i]-1)
     else:
         continue
-    
+
 #matplotlib描画
 fig, (ax1,ax2) = plt.subplots(2,1,figsize=(1.6180 * 4, 4*2))
 #ax3 = ax1.twinx()
@@ -146,11 +172,11 @@ lns3=ax4.plot(days_from_22_Jan_20_, gamma_est, "o-", color="black", zorder=1,lab
 #lns4=ax2.bar(days_from_22_Jan_20_, day_confirmed, zorder=2, label = "day_confirmed")
 lns4=ax2.plot(days_from_22_Jan_20_, R_est, "o-", color="blue",label = "R_est")
 lns5=ax1.semilogy(days_from_22_Jan_20_, diff_confirmed, ".-", color="black",label = "I/(R+D)")
-lns6=ax1.semilogy(t1, est,"-", color="black", zorder=1, label = "est_r0={:.2f}alpha={:.2e}".format(r0,alpha))
-lns7=ax2.plot(t1, diff_est,"-", color="black", zorder=1, label = "diff_est_r0={:.2f}alpha={:.2e}".format(r0,alpha))
+lns6=ax1.semilogy(t1, est,"-", color="black", zorder=1, label = "est_r0={:.2f}alpha={:.2e}".format(r0,a))
+lns7=ax2.plot(t1, diff_est,"-", color="black", zorder=1, label = "diff_est_r0={:.2f}alpha={:.2e}".format(r0,a))
 lns9=ax2.bar(days_from_22_Jan_20_, day_confirmed_r, label = "day_confirmed_r")
 #lns10=ax2.plot(days_from_22_Jan_20_, R_0, "o-", color="red",label = "R_0")
-lns4=ax2.plot(days_from_22_Jan_20_, C, "-", color="red",label = "gamma*(R-1)")
+lns4=ax2.plot(days_from_22_Jan_20_, C, "o-", color="red",label = "gamma*(R-1)")
 
 lns_ax1 = lns1 +lns2 +lns5 + lns6 +lns8
 labs_ax1 = [l.get_label() for l in lns_ax1]
@@ -168,8 +194,8 @@ ax1.set_ylabel("casas, recovered ")
 ax4.set_ylabel("gamma")
 ax2.set_ylabel("day_confirmed_r, R")
 ax4.set_ylim(0,0.04)
-ax2.set_ylim(0,40)
-#ax2.set_yscale('log')
+#ax2.set_ylim(0,40)
+ax2.set_yscale('log')
 #ax4.set_yscale('log')
 
 #ax3.set_ylabel("deaths ")
@@ -179,14 +205,32 @@ ax1.grid()
 ax2.grid()
 
 plt.pause(1)
+#city = "Tiwan"
 plt.savefig('./fig/removed_{}_gamma_R_{}.png'.format(city,skd)) 
 plt.close() 
+
+t=np.arange(63,t_max,dt)
+t4=t
+obs_i = C[63:]
+r0_=1
+alpha_ = 1
+ini_state=[1, 1]
+#optimize logscale likelihood function
+mnmz=minimize(yj,ini_state,method="nelder-mead")
+print(mnmz)
+r0_,alpha_ = mnmz.x[0],mnmz.x[1]
+#t4=t
+est_C = estimate_j(ini_state,r0_,alpha_)
+
+t=np.arange(63,100,dt)
+t4=t
+est_C=estimate_j(ini_state,r0_,alpha_)
 
 #matplotlib描画
 fig, ax4 = plt.subplots(1,1,figsize=(1.6180 * 4, 4*1))
 
-lns4=ax4.plot(days_from_22_Jan_20_, C, "o-", color="blue",label = "gamma*(R-1)")
-
+lns10=ax4.plot(days_from_22_Jan_20_, C, "o-", color="blue",label = "gamma*(R-1)")
+lns11=ax4.plot(t4, est_C, ".-", color="black",label = "est_gamma*(R-1)")
 ax4.legend(loc=2)
 
 ax4.set_title(city +" ; {} cases, {} recovered, {} deaths".format(t_cases,t_recover,t_deaths))
@@ -200,6 +244,20 @@ plt.pause(1)
 plt.savefig('./fig/removed_{}_gammaR_{}.png'.format(city,skd)) 
 plt.close() 
 
+t=np.arange(63,t_max,dt)
+t2=t
+obs_i = confirmed[63:]
+r0_=1
+alpha_ = 1
+ini_state=[5.70579672, 0.00755685]
+#optimize logscale likelihood function
+mnmz=minimize(y,ini_state,method="nelder-mead")
+print(mnmz)
+r0_,alpha_ = mnmz.x[0],mnmz.x[1]
+#est_confirmed=estimate_i(ini_state,r0_,alpha_)
+#t=np.arange(63,100,dt)
+t3=t
+est_confirmed=estimate_i(ini_state,r0_,alpha_)
 
 t=np.arange(63,100,dt)
 t3=t
@@ -212,7 +270,7 @@ lns1=ax3.semilogy(days_from_22_Jan_20, confirmed, "o-", color="red",label = "cas
 lns8=ax3.semilogy(t3, est_confirmed, "-", color="black",label = "cases_r0_={:.2f}alpha_={:.2e}".format(r0_,alpha_))
 lns2=ax3.semilogy(days_from_22_Jan_20, confirmed_r, "*-", color="green",label = "recovered+deaths")
 lns5=ax3.semilogy(days_from_22_Jan_20_, diff_confirmed, ".-", color="black",label = "I/(R+D)")
-lns6=ax3.semilogy(t1, est,"-", color="black", zorder=1, label = "est_r0={:.2f}alpha={:.2e}".format(r0,alpha))
+lns6=ax3.semilogy(t1, est,"-", color="black", zorder=1, label = "est_r0={:.2f}alpha={:.2e}".format(r0,a))
 
 lns_ax1 = lns1 +lns2 +lns5 + lns6 +lns8
 labs_ax1 = [l.get_label() for l in lns_ax1]
